@@ -1,5 +1,6 @@
 import { SocksClientOptions } from "socks";
-export default class ImapClient {
+import { EventEmitter } from "events";
+export default class ImapClient extends EventEmitter {
   private options;
   private socket;
   private commandQueue;
