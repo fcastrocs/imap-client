@@ -20,7 +20,7 @@ export default class ImapClient {
 
   async connect() {
     const info = await SocksClient.createConnection(this.options);
-    this.socket = tls.connect({ servername: this.options.destination.host, socket: info.socket });
+    this.socket = tls.connect({ servername: this.options.destination.host, socket: info.socket, rejectUnauthorized: false });
     this.socket.setKeepAlive(true);
     this.connected = true;
     this.socket.on("data", (data) => {
