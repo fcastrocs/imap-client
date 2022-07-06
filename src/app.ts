@@ -1,11 +1,12 @@
 import { Socket } from "net";
 import { SocksClient, SocksClientOptions } from "socks";
+import { EventEmitter } from "stream";
 import tls from "tls";
 import { Command } from "../@types";
 
 const CMD_TAG_PREFIX = "A";
 
-export default class ImapClient {
+export default class ImapClient extends EventEmitter {
   private options: SocksClientOptions;
   private socket: Socket;
   private commandQueue: Command[] = [];
@@ -15,11 +16,15 @@ export default class ImapClient {
   private greeted: boolean = false;
 
   constructor(options: SocksClientOptions) {
+    super();
     this.options = options;
   }
 
   async connect() {
     const info = await SocksClient.createConnection(this.options);
+    info.socket.on("error", (error) => {
+      this.emit("error", error);
+    });
     this.socket = tls.connect({ servername: this.options.destination.host, socket: info.socket, rejectUnauthorized: false });
     this.socket.setKeepAlive(true);
     this.connected = true;
