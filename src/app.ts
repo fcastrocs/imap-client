@@ -1,6 +1,6 @@
 import { Socket } from "net";
 import { SocksClient, SocksClientOptions } from "socks";
-import { EventEmitter } from "stream";
+import { EventEmitter } from "events";
 import tls from "tls";
 import { Command } from "../@types";
 
