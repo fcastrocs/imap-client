@@ -60,7 +60,7 @@ export default class ImapClient {
   }
 
   private executeCommand() {
-    if (this.commandQueue.length > 0 && !this.currentCommand) {
+    if (this.commandQueue.length == 0 || !this.currentCommand) {
       return;
     }
     this.currentCommand = this.commandQueue.shift();
