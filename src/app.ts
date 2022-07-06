@@ -24,10 +24,9 @@ export default class ImapClient {
     this.socket.setKeepAlive(true);
     this.connected = true;
     this.socket.on("data", (data) => {
-      console.log(data.toString());
-
       if (!this.greeted) {
         this.greeted = true;
+        return;
       }
 
       if (this.currentCommand) {
@@ -40,11 +39,14 @@ export default class ImapClient {
   }
 
   async login(username: string, password: string) {
-    const callback = (buffer: Buffer) => {
-      console.log(buffer.toString());
-    };
-
-    this.sendCommand({ cmd: `LOGIN ${username} ${password}`, callback });
+    return new Promise((resolve, reject) => {
+      const callback = (buffer: Buffer) => {
+        const response = buffer.toString();
+        if (response.includes("A1 OK")) return resolve("logged in");
+        return reject(response);
+      };
+      this.sendCommand({ cmd: `LOGIN ${username} ${password}`, callback });
+    });
   }
 
   private sendCommand(command: Command) {
@@ -60,7 +62,7 @@ export default class ImapClient {
   }
 
   private executeCommand() {
-    if (this.commandQueue.length == 0 || !this.currentCommand) {
+    if (this.commandQueue.length == 0 || this.currentCommand) {
       return;
     }
     this.currentCommand = this.commandQueue.shift();
