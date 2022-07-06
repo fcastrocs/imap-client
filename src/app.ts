@@ -49,6 +49,10 @@ export default class ImapClient {
     });
   }
 
+  public disconnect() {
+    this.socket.destroy();
+  }
+
   private sendCommand(command: Command) {
     if (!this.connected) {
       throw "Not connected to imap server";

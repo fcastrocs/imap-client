@@ -10,6 +10,7 @@ export default class ImapClient {
   constructor(options: SocksClientOptions);
   connect(): Promise<void>;
   login(username: string, password: string): Promise<void>;
+  disconnect(): void;
   private sendCommand;
   private executeCommand;
 }
