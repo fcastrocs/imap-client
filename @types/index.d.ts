@@ -8,7 +8,8 @@ export default class ImapClient extends EventEmitter {
   private cmdTag;
   private connected;
   private greeted;
-  constructor(options: SocksClientOptions);
+  private tls;
+  constructor(options: SocksClientOptions, tls: boolean);
   connect(): Promise<void>;
   login(username: string, password: string): Promise<void>;
   disconnect(): void;

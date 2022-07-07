@@ -14,10 +14,12 @@ export default class ImapClient extends EventEmitter {
   private cmdTag = 1;
   private connected: boolean = false;
   private greeted: boolean = false;
+  private tls: boolean;
 
-  constructor(options: SocksClientOptions) {
+  constructor(options: SocksClientOptions, tls: boolean) {
     super();
     this.options = options;
+    this.tls = tls;
   }
 
   async connect() {
@@ -25,7 +27,11 @@ export default class ImapClient extends EventEmitter {
     info.socket.on("error", (error) => {
       this.emit("error", error);
     });
-    this.socket = tls.connect({ servername: this.options.destination.host, socket: info.socket, rejectUnauthorized: false });
+
+    if (this.tls) {
+      this.socket = tls.connect({ servername: this.options.destination.host, socket: info.socket, rejectUnauthorized: false });
+    }
+
     this.socket.setKeepAlive(true);
     this.connected = true;
     this.socket.on("data", (data) => {
