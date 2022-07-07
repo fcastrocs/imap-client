@@ -11,7 +11,6 @@ export default class ImapClient extends EventEmitter {
   private socket: Socket;
   private commandQueue: Command[] = [];
   private currentCommand: Command = null;
-  private cmdTag = 1;
   private connected: boolean = false;
   private greeted: boolean = false;
   private tls: boolean;
@@ -24,10 +23,6 @@ export default class ImapClient extends EventEmitter {
 
   async connect() {
     const info = await SocksClient.createConnection(this.options);
-    info.socket.on("error", (error) => {
-      this.emit("error", error);
-    });
-
     if (this.tls) {
       this.socket = tls.connect({ servername: this.options.destination.host, socket: info.socket, rejectUnauthorized: false });
     } else {
@@ -36,6 +31,11 @@ export default class ImapClient extends EventEmitter {
 
     this.socket.setKeepAlive(true);
     this.connected = true;
+
+    this.socket.on("error", (error) => {
+      this.emit("error", error);
+    });
+
     this.socket.on("data", (data) => {
       if (!this.greeted) {
         this.greeted = true;
@@ -61,7 +61,7 @@ export default class ImapClient extends EventEmitter {
     return new Promise((resolve, reject) => {
       const callback = (buffer: Buffer) => {
         const response = buffer.toString();
-        if (response.includes("A1 OK")) return resolve("logged in");
+        if (response.includes(CMD_TAG_PREFIX + " OK")) return resolve("logged in");
         return reject(response);
       };
       this.sendCommand({ cmd: `login ${username} ${password}`, callback });
@@ -116,8 +116,7 @@ export default class ImapClient extends EventEmitter {
       return;
     }
     this.currentCommand = this.commandQueue.shift();
-    const socketCommand = CMD_TAG_PREFIX + this.cmdTag + " " + this.currentCommand.cmd + "\r\n";
-    this.cmdTag++;
+    const socketCommand = CMD_TAG_PREFIX + " " + this.currentCommand.cmd + "\r\n";
     this.socket.write(socketCommand);
   }
 }

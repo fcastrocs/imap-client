@@ -5,7 +5,6 @@ export default class ImapClient extends EventEmitter {
   private socket;
   private commandQueue;
   private currentCommand;
-  private cmdTag;
   private connected;
   private greeted;
   private tls;
@@ -14,7 +13,6 @@ export default class ImapClient extends EventEmitter {
   login(username: string, password: string, authType: AuthType): Promise<unknown>;
   private plainLogin;
   disconnect(): void;
-  private getLoginCapabilities;
   private sendCommand;
   private executeCommand;
 }
