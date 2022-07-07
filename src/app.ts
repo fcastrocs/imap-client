@@ -2,7 +2,7 @@ import { Socket } from "net";
 import { SocksClient, SocksClientOptions } from "socks";
 import { EventEmitter } from "events";
 import tls from "tls";
-import { Command } from "../@types";
+import { AuthType, Command } from "../@types";
 
 const CMD_TAG_PREFIX = "A";
 
@@ -51,16 +51,49 @@ export default class ImapClient extends EventEmitter {
     });
   }
 
-  async login(username: string, password: string) {
+  async login(username: string, password: string, authType: AuthType) {
+    if (authType === "PLAIN") {
+      return this.plainLogin(username, password);
+    }
+  }
+
+  private async plainLogin(username: string, password: string) {
     return new Promise((resolve, reject) => {
       const callback = (buffer: Buffer) => {
         const response = buffer.toString();
         if (response.includes("A1 OK")) return resolve("logged in");
         return reject(response);
       };
-      this.sendCommand({ cmd: `LOGIN ${username} ${password}`, callback });
+      this.sendCommand({ cmd: `login ${username} ${password}`, callback });
     });
   }
+
+  /*private async cramMD5Login(username: string, password: string) {
+    return new Promise((resolve, reject) => {
+      this.sendCommand({
+        cmd: `authenticate cram-md5`,
+        callback: (data: Buffer) => {
+          const challenge = data.toString().replace("+", "");
+          const hmacMd5 = crypto.createHmac("md5", password);
+          hmacMd5.update(challenge);
+
+          const cmd = Buffer.from(username + " " + hmacMd5.digest("hex").toLowerCase()).toString("base64");
+          this.sendCommand({
+            cmd,
+            callback: (data) => {
+              console.log(data);
+            },
+          });
+        },
+      });
+
+      const callback = (buffer: Buffer) => {
+        const response = buffer.toString();
+        if (response.includes("A1 OK")) return resolve("logged in");
+        return reject(response);
+      };
+    });
+  }*/
 
   public disconnect() {
     this.socket.destroy();
