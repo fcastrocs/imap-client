@@ -8,6 +8,7 @@ export default class ImapClient extends EventEmitter {
   private currentCommand;
   private connected;
   private greeted;
+  on(event: "error", listener: (error: Error) => void): this;
   constructor(options: SocksClientOptions, tls: boolean);
   connect(): Promise<void>;
   login(username: string, password: string, authType: AuthType): Promise<unknown>;
