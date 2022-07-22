@@ -1,13 +1,13 @@
 import { SocksClientOptions } from "socks";
 import { EventEmitter } from "events";
 export default class ImapClient extends EventEmitter {
-  private options;
+  private readonly options;
+  private readonly commandQueue;
+  private readonly tls;
   private socket;
-  private commandQueue;
   private currentCommand;
   private connected;
   private greeted;
-  private tls;
   constructor(options: SocksClientOptions, tls: boolean);
   connect(): Promise<void>;
   login(username: string, password: string, authType: AuthType): Promise<unknown>;
@@ -18,7 +18,6 @@ export default class ImapClient extends EventEmitter {
 }
 
 export type AuthType = "PLAIN" | "CRAM-MD5";
-
 export interface Command {
   cmd: string;
   callback: (buffer: Buffer) => void;
